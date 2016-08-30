@@ -30,7 +30,7 @@ void add_and_print(char* num1, char* num2) {
     for (j = 0; j < max_len; ++j) {
         result_string[j] = 'x';
     } 
-    result_string[max_len] = '\0';
+    result_string[max_len + 1] = '\0';
 
     int carry, num1_int, num2_int, result;
 
@@ -39,18 +39,30 @@ void add_and_print(char* num1, char* num2) {
     printf("%s + %s = ", num1, num2);
 
     carry = 0;
-    int i;
-    for (i = 0; i < shortest_length; ++i) { 
+    int i = shortest_length;
+    while ( i --> 0) {
         num1_int = num1[i] - '0';
         num2_int = num2[i] - '0';
 
         __add_big_ints__(& num1_int, & num2_int, & carry, & result);
-        printf("%d", result);
-        result_string[max_len - i - 1] = '0' + result;
-    }
 
-    result += carry;
+        //printf("%d", result);
+        result_string[i] = '0' + result;
+    }
+    printf("%s\n\n", result_string);
+
+
+    /*
+     * TODO:
+     *     what if result + carry > 10?
+     */
+    if (result + carry < 10) {
+        result += carry;
+    } else { 
+        ;
+    }
     carry = 0;
+
     for ( ; i < max_len; ++i) {
         result_string[max_len - i - 1] = result;
 
@@ -62,6 +74,12 @@ void add_and_print(char* num1, char* num2) {
 
         __add_big_ints__(& num1_int, & num2_int, & carry, & result);
     }
+
+    /*
+     * TODO: 
+     *     if result + carry is > 10 for last digit, then what to do?
+     */
+
     //printf("%s\n\n", result_string);
     printf("\n\n");
     return;
