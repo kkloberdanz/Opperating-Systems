@@ -8,13 +8,14 @@
 #define MAX_NUM_LENGTH 10000 
 
 void __add_big_ints__(const int * op1, const int * op2, int * carry, int * result) { 
-    if (*op1 + *op2 + *carry < 10) { 
-        *carry = 0; 
+    if ((*op1 + *op2 + *carry) < 10) { 
         *result = *op1 + *op2 + *carry;
+        *carry = 0; 
     } else {
+        *result = (*op1 + *op2 + *carry) % 10;
         *carry = 1;
-        *result = *op1 + *op2 - 10;
     }
+    printf("op1:  %d, op2:  %d, result: %d, carry: %d\n", *op1, *op2, *result, *carry);
 }
 
 void add_and_print(char* num1, char* num2) {
@@ -36,52 +37,46 @@ void add_and_print(char* num1, char* num2) {
 
     int shortest_length = (strlen(num1) < strlen(num2)) ? strlen(num1) : strlen(num2);
 
-    printf("%s + %s = ", num1, num2);
 
+    printf("%s + %s = \n", num1, num2);
     carry = 0;
-    int i = shortest_length;
-    while ( i --> 0) {
-        num1_int = num1[i] - '0';
-        num2_int = num2[i] - '0';
+    int i;
+    for (i = 0; i < shortest_length; ++i) { 
+        num1_int = num1[len_num1 - i - 1] - '0';
+        num2_int = num2[len_num2 - i - 1] - '0';
 
-        __add_big_ints__(& num1_int, & num2_int, & carry, & result);
+        printf("num1: %d, num2: %d, result: %d, carry: %d\n\n", num1_int, num2_int, result, carry);
 
-        //printf("%d", result);
-        result_string[i] = '0' + result;
+        __add_big_ints__(& num1_int, & num2_int, & carry, & result); 
+        result_string[max_len - i ] = '0' + result;
     }
-    printf("%s\n\n", result_string);
-
-
-    /*
-     * TODO:
-     *     what if result + carry > 10?
-     */
-    if (result + carry < 10) {
-        result += carry;
-    } else { 
-        ;
-    }
-    carry = 0;
 
     for ( ; i < max_len; ++i) {
-        result_string[max_len - i - 1] = result;
+
 
         if (len_num1 > len_num2) {
+            num1_int = num1[len_num1 - i - 1] - '0';
             num2_int = 0;
-        } else {
-            num1_int = 0;
-        }
 
-        __add_big_ints__(& num1_int, & num2_int, & carry, & result);
+            __add_big_ints__(& num1_int, & num2_int, & carry, & result); 
+            result_string[max_len - i ] = '0' + result;
+
+        } else if (len_num1 < len_num2) {
+            num1_int = 0;
+            num2_int = num2[len_num2 - i - 1] - '0';
+
+            __add_big_ints__(& num1_int, & num2_int, & carry, & result); 
+            result_string[max_len - i ] = '0' + result;
+        } 
+        printf("num1: %d, num2: %d, result: %d, carry: %d\n\n", num1_int, num2_int, result, carry);
     }
 
-    /*
-     * TODO: 
-     *     if result + carry is > 10 for last digit, then what to do?
-     */
+    if (carry) {
+        result_string[0] = '1';
+    }
 
-    //printf("%s\n\n", result_string);
-    printf("\n\n");
+    printf("%s\n\n", result_string); 
+
     return;
 }
 
