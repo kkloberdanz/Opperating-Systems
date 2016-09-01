@@ -23,8 +23,8 @@ void add_and_print(char* num1, char* num2) {
     int len_num2 = strlen(num2);
     int max_len = (len_num1 > len_num2) ? len_num1 : len_num2;
 
-    //char result_string[max_len + 1];
-    char result_string[max_len + 2];
+    // +2 needed because final result could be 1 digit longer than either operand
+    char result_string[max_len + 2]; 
 
     int j;
     for (j = 0; j < max_len; ++j) {
@@ -36,6 +36,7 @@ void add_and_print(char* num1, char* num2) {
 
     int shortest_length = (strlen(num1) < strlen(num2)) ? strlen(num1) : strlen(num2); 
 
+    // add digits until the end of the shortest operand
     carry = 0;
     int i;
     for (i = 0; i < shortest_length; ++i) { 
@@ -46,8 +47,8 @@ void add_and_print(char* num1, char* num2) {
         result_string[max_len - i ] = '0' + result;
     }
 
-    for ( ; i < max_len; ++i) {
-
+    // add the remaining digits from longest opperand
+    for ( ; i < max_len; ++i) { 
 
         if (len_num1 > len_num2) {
             num1_int = num1[len_num1 - i - 1] - '0';
@@ -65,8 +66,11 @@ void add_and_print(char* num1, char* num2) {
         } 
     }
 
+    // if a carry is left over, then the most significant digit will be a 1
     if (carry) {
         result_string[0] = '1';
+
+    // else shift all digits left by 1
     } else {
         char tmp;
         for (i = 0; result_string[i] != '\0'; ++i) {

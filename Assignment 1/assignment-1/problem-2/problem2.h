@@ -1,5 +1,5 @@
-#ifndef __PROBLEM2_H__
-#define __PROBLEM2_H__
+#ifndef PROBLEM2_H
+#define PROBLEM2_H
 
 #define MAX_NUM_LENGTH 10000
 
