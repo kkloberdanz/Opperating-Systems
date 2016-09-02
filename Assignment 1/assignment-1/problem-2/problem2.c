@@ -8,14 +8,14 @@
 #define MAX_NUM_LENGTH 10000 
 
 void __add_big_ints__(const int * op1, const int * op2, int * carry, int * result) { 
-    if ((*op1 + *op2 + *carry) < 10) { 
+    if ((*op1 + *op2 + *carry) < 10) {
         *result = *op1 + *op2 + *carry;
-        *carry = 0; 
+        *carry = 0;
     } else {
-        *result = (*op1 + *op2 + *carry) % 10;
+        *result = (*op1 + *op2 + *carry) - 10;
         *carry = 1;
     }
-}
+} 
 
 void add_and_print(const char* num1, const char* num2) {
 	// Implement this function.
@@ -61,7 +61,7 @@ void add_and_print(const char* num1, const char* num2) {
     if (carry) {
         result_string[0] = '1';
 
-    // else shift all digits left by 1
+    // else move all digits left by 1
     } else {
         char tmp;
         for (i = 0; result_string[i] != '\0'; ++i) {
