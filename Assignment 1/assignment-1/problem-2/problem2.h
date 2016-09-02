@@ -5,6 +5,6 @@
 
 void __add_big_ints__(const int *, const int *, int *, int *);
 
-void add_and_print(char*, char*);
+void add_and_print(const char*, const char*);
 
 #endif /* __PROBLEM2_H__ */
