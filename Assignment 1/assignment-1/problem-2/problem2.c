@@ -12,7 +12,7 @@ void __add_big_ints__(const int * op1, const int * op2, int * carry, int * resul
         *result = *op1 + *op2 + *carry;
         *carry = 0;
     } else {
-        *result = (*op1 + *op2 + *carry) - 10;
+        *result = (*op1 + *op2 + *carry) % 10;
         *carry = 1;
     }
 } 
@@ -30,7 +30,7 @@ void add_and_print(const char* num1, const char* num2) {
 
     // add digits until the end of the shortest operand
     int carry = 0, num1_int, num2_int, result, i; 
-    for (i = 0; i < shortest_length; ++i) { 
+    for (i = 0; i < shortest_length; ++i) {
         num1_int = num1[len_num1 - i - 1] - '0';
         num2_int = num2[len_num2 - i - 1] - '0'; 
 
