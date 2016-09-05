@@ -1,2 +1,2 @@
 all:
-	gcc -o fastsort fastsort.c -O2
+	gcc -o fastsort fastsort.c -O2 -Wall -Wpedantic -Wextra
