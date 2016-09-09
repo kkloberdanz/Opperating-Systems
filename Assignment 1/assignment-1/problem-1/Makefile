@@ -1,2 +1,2 @@
 all:
-	gcc -o fastsort fastsort.c -O2 -Wall -Wpedantic -Wextra
+	gcc -o fastsort problem1.c -O2 -Wall -Wpedantic -Wextra
