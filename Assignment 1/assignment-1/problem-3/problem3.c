@@ -15,6 +15,7 @@ struct node {
 };
 */
 
+/*
 void add_to_linked_list(struct node* head, const char* value) { 
     while (head->next != NULL) {
         head = head->next; 
@@ -59,6 +60,162 @@ void zero_string(char* s) {
         s[i] = '0';
     }
 }
+*/
+
+
+
+
+
+void reverse_string(char* s) {
+    int len_s = strlen(s);
+    if (len_s > 1) {
+        int i;
+        char tmp;
+        for (i = 0; i < len_s / 2; ++i) { 
+            tmp = s[i];
+            s[i] = s[len_s - i - 1];
+            s[len_s - i - 1] = tmp;
+        }
+    } else {
+        return;
+    }
+}
+
+/*
+void multiply_and_print(char* num1, char* num2) {
+	// Implement this function.  
+
+    printf("%s * %s\n", num1, num2);
+
+    const int len_num1 = strlen(num1);
+    const int len_num2 = strlen(num2);
+    const int greatest_length = (len_num1 > len_num2) ? len_num1 : len_num2;
+    const int shortest_length = (len_num1 < len_num2) ? len_num1 : len_num2; 
+    const int max_len = len_num1 + len_num2;
+
+    char result_string[max_len + 2]; 
+    result_string[max_len + 1] = '\0';
+
+    int j;
+    for (j = 0; result_string[j] != '\0'; ++j) {
+        result_string[j] = 'x';
+    }
+
+    char rev_num1[strlen(num1) - 1];
+    for (j = 0; rev_num1[j] != '\0'; ++j) {
+        rev_num1[j] = 'x';
+    }
+
+
+    char num1_rev[strlen(num1)];
+    char num2_rev[strlen(num2)];
+
+    strcpy(num1_rev, num1);
+    strcpy(num2_rev, num2);
+
+    reverse_string(num1_rev);
+    reverse_string(num2_rev);
+
+    struct node* head = malloc(sizeof(struct node));
+    head->next = NULL;
+
+    // add digits until the end of the shortest operand
+    int carry = 0, k = 0, num1_int, num2_int, result, i; 
+    for (i = 0; i < len_num1; ++i) {
+
+        num1_int = num1_rev[i] - '0';
+
+        for (j = 0; j < len_num2; ++j) {
+            num2_int = num2_rev[j] - '0';
+
+            //printf("%5d * %5d\n", num1_int, num2_int);
+            __mult_big_ints__(&num1_int, &num2_int, &carry, &result);
+            //printf("%d * %d = %d, carry = %d\n", num1_int, num2_int, result, carry);
+            result_string[j] = '0' + result;
+            //k++;
+
+        }
+        reverse_string(result_string);
+        add_to_linked_list(head, result_string);
+        zero_string(result_string);
+    }
+
+    printf("*** printing linked list ***\n");
+    print_linked_list(head);
+
+    //puts("******************************");
+
+    char* final_result;
+    sum_linked_list(head, final_result);
+
+    //reverse_string(result_string); 
+
+    printf("%5s * %5s == %7s\n", num1, num2, final_result); 
+
+    //destroy_linked_list(head);
+    return;
+} 
+*/
+
+void add_and_print(const char* num1, const char* num2) {
+	// Implement this function.
+    const int len_num1 = strlen(num1);
+    const int len_num2 = strlen(num2);
+    const int max_len = (len_num1 > len_num2) ? len_num1 : len_num2;
+    const int shortest_length = (len_num1 < len_num2) ? len_num1 : len_num2; 
+
+    // +2 needed because final result could be 1 digit longer than either operand
+    char result_string[max_len + 2]; 
+    result_string[max_len + 1] = '\0';
+
+    // add digits until the end of the shortest operand
+    int carry = 0, num1_int, num2_int, result, i; 
+    for (i = 0; i < shortest_length; ++i) {
+        num1_int = num1[len_num1 - i - 1] - '0';
+        num2_int = num2[len_num2 - i - 1] - '0'; 
+
+        __add_digits_with_carry__(& num1_int, & num2_int, & carry, & result); 
+        result_string[max_len - i ] = '0' + result;
+    }
+
+    // add the remaining digits from longest opperand
+    for ( ; i < max_len; ++i) { 
+
+        if (len_num1 > len_num2) {
+            num1_int = num1[len_num1 - i - 1] - '0';
+            num2_int = 0;
+
+            __add_digits_with_carry__(& num1_int, & num2_int, & carry, & result); 
+            result_string[max_len - i ] = '0' + result;
+
+        } else if (len_num1 < len_num2) {
+            num1_int = 0;
+            num2_int = num2[len_num2 - i - 1] - '0';
+
+            __add_digits_with_carry__(& num1_int, & num2_int, & carry, & result); 
+            result_string[max_len - i ] = '0' + result;
+        } 
+    }
+
+    // if a carry is left over, then the most significant digit will be a 1
+    if (carry) {
+        result_string[0] = '1';
+
+    // else move all digits left by 1
+    } else {
+        char tmp;
+        for (i = 0; result_string[i] != '\0'; ++i) {
+            tmp = result_string[i+1];
+            result_string[i] = tmp;
+        }
+    }
+
+    printf("%s + %s == %s\n", num1, num2, result_string); 
+
+    return;
+}
+
+
 
 void __add_digits_with_carry__(const int * op1, const int * op2, int * carry, int * result) { 
     if ((*op1 + *op2 + *carry) < 10) {
@@ -142,95 +299,55 @@ void __mult_big_ints__(const int * op1, const int * op2, int * carry, int * resu
         *result = (prod + *carry) % 10;
         *carry = (prod + *carry) / 10;
     }
-} 
-
-void reverse_string(char* s) {
-    int len_s = strlen(s);
-    if (len_s > 1) {
-        int i;
-        char tmp;
-        for (i = 0; i < len_s / 2; ++i) { 
-            tmp = s[i];
-            s[i] = s[len_s - i - 1];
-            s[len_s - i - 1] = tmp;
-        }
-    } else {
-        return;
-    }
 }
 
 void multiply_and_print(char* num1, char* num2) {
-	// Implement this function.  
+    printf("\nTrying: %s * %s\n", num1, num2);
+    int i, j, k, len_1, len_2; 
+    len_1 = strlen(num1);
+    len_2 = strlen(num2);
 
-    printf("%s * %s\n", num1, num2);
+    int digit_1, digit_2, carry = 0, result;
 
-    const int len_num1 = strlen(num1);
-    const int len_num2 = strlen(num2);
-    const int greatest_length = (len_num1 > len_num2) ? len_num1 : len_num2;
-    const int shortest_length = (len_num1 < len_num2) ? len_num1 : len_num2; 
-    const int max_len = len_num1 + len_num2;
-
-    char result_string[max_len + 2]; 
-    result_string[max_len + 1] = '\0';
-
-    int j;
-    for (j = 0; j < result_string[j] != '\0'; ++j) {
-        result_string[j] = 'x';
-    }
-
-    char rev_num1[strlen(num1) - 1];
-    for (j = 0; rev_num1[j] != '\0'; ++j) {
-        rev_num1[j] = 'x';
-    }
-
-
-    char num1_rev[strlen(num1)];
-    char num2_rev[strlen(num2)];
-
-    strcpy(num1_rev, num1);
-    strcpy(num2_rev, num2);
-
-    reverse_string(num1_rev);
-    reverse_string(num2_rev);
-
-    struct node* head = malloc(sizeof(struct node));
-    head->next = NULL;
-
-    // add digits until the end of the shortest operand
-    int carry = 0, k = 0, num1_int, num2_int, result, i; 
-    for (i = 0; i < len_num1; ++i) {
-
-        num1_int = num1_rev[i] - '0';
-
-        for (j = 0; j < len_num2; ++j) {
-            num2_int = num2_rev[j] - '0';
-
-            //printf("%5d * %5d\n", num1_int, num2_int);
-            __mult_big_ints__(&num1_int, &num2_int, &carry, &result);
-            //printf("%d * %d = %d, carry = %d\n", num1_int, num2_int, result, carry);
-            result_string[j] = '0' + result;
-            //k++;
-
+    /* Intermediate Result String -> irs
+     * contains results of multiplication
+     * elements then needed to be summed to get final result */
+    char irs[len_1][len_1 + len_2];
+    for (i = 0; i < len_1; ++i) {
+        for (j = 0; j < len_1; ++j) {
+            irs[i][j] = 'x';
         }
-        reverse_string(result_string);
-        add_to_linked_list(head, result_string);
-        zero_string(result_string);
+        irs[i][j] = '\0';
     }
 
-    printf("*** printing linked list ***\n");
-    print_linked_list(head);
+    for (i = 0; i < len_1; ++i) {
+        digit_1 = num1[len_1- i - 1] - '0';
 
-    //puts("******************************");
+        for (j = 0; j < len_2; ++j) {
+            digit_2 = num2[len_2 - j - 1] - '0';
 
-    char* final_result;
-    sum_linked_list(head, final_result);
+            printf("%d * %d\n", digit_1, digit_2);
+            __mult_big_ints__(&digit_1, &digit_2, &carry, &result); 
+            irs[i][j] = result + '0';
+        } 
+        
+        if (carry) {
+            irs[i][j+1] = carry;
+        }
 
-    //reverse_string(result_string); 
+        reverse_string(irs[i]);
+        
+    } 
 
-    printf("%5s * %5s == %7s\n", num1, num2, final_result); 
+    int num_intermediate_values = i;
 
-    //destroy_linked_list(head);
-    return;
+    for (i = 0; i < num_intermediate_values; ++i) { 
+        //add_big_ints(irs[i], irs[i], irs[i+1]);
+        //add_and_print(irs[i], irs[i+1]);
+        printf("irs[%d] == %s\n", i, irs[i]);
+    }
+
+    //printf("%s\n", irs[num_intermediate_values - 1]);
 }
 
 int main (int argc , char * argv []) {
