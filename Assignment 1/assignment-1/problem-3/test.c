@@ -78,7 +78,7 @@ void add_and_print(const char* num1, const char* num2) {
         }
     }
 
-    printf("%s + %s == %s\n", num1, num2, result_string); 
+    //printf("%s + %s == %s\n", num1, num2, result_string); 
 
     return;
 } 
@@ -145,8 +145,8 @@ int add_big_ints(char* result_string, const char* num1, const char* num2) {
         }
     }
 
-    printf("%s + %s == %s\n", num1, num2, result_string); 
-    return atoi(result_string);
+    //printf("%s + %s == %s\n", num1, num2, result_string); 
+    //return atoi(result_string);
 }
 
 void __mult_with_carry__(const int op1, 
@@ -171,7 +171,7 @@ void __mult_with_carry__(const int op1,
 }
 
 void multiply_and_print(char* num1, char* num2) {
-    printf("Multiplying: %s * %s\n", num1, num2);
+    printf("#Multiplying: %s * %s\n", num1, num2);
     char s1[MAX_NUM_LENGTH];
     char s2[MAX_NUM_LENGTH];
     char result_string[MAX_NUM_LENGTH + 1];
@@ -210,10 +210,10 @@ void multiply_and_print(char* num1, char* num2) {
                                 &carry,
                                 &result);
 
-            printf("result: %d, carry: %d\n", result, carry);
+            //printf("result: %d, carry: %d\n", result, carry);
             result_string[k] = result + '0';
             k++;
-            printf("result_string: %s\n", result_string);
+            //printf("result_string: %s\n", result_string);
         }
 
         if (carry) {
@@ -233,7 +233,7 @@ void multiply_and_print(char* num1, char* num2) {
 
         strcpy(result_vector[result_vector_index], result_string);
         result_vector_index++;
-        printf("result_string: %s\n", result_string);
+        //printf("result_string: %s\n", result_string);
 
         //zero string
         for (j = 0; result_string[j] != '\0'; ++j) {
@@ -243,13 +243,25 @@ void multiply_and_print(char* num1, char* num2) {
     } 
 
     // This must be changed to sum big ints
+	/*
     int sum = 0; 
     for (j = 0; j < len_s1; ++j) {
         printf("%s\n", result_vector[j]);
         sum += atoi(result_vector[j]);
     }
+	*/
 
-    printf("FINAL RESULT:\n%s * %s == %d\n\n", num1, num2, sum);
+    char sum[MAX_NUM_LENGTH*2] = {'0'};
+    char intermediate_result[MAX_NUM_LENGTH*2] = {'0'};
+
+    for (j = 0; j < len_s1; ++j) {
+        add_big_ints(intermediate_result, sum, result_vector[j]);
+        strcpy(sum, intermediate_result);
+        //printf("result_vector[j] = '%s'\n", result_vector[j]);
+        //printf("sum = '%s'\n", sum);
+    }
+
+    printf("#FINAL RESULT:\n%s * %s == %s\n\n", num1, num2, sum);
 }
 
 int main (int argc , char * argv []) {
