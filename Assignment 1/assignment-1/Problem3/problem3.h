@@ -28,7 +28,7 @@ void zero_string(char* );
 void __add_digits_with_carry__(const int * , const int * , int * , int * ); 
  
 
-int add_big_ints(char* , const char* , const char* );
+void add_big_ints(char* , const char* , const char* );
 
 void __mult_big_ints__(const int * , const int * , int * , int * );
  
