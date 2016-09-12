@@ -32,3 +32,49 @@ Calculate a ^ b
 
 ftell() gives number of bytes for a file
 
+Midterm: 
+
+    Default File Descriptors:
+        Stdout
+        Stdin
+        Stderr
+
+    Global variables and static variables are stored in 'Static Data'
+
+    Von Neuman:
+        Fetch instruction, decode it, execute it, store
+
+    Difference between process and thread?  
+    What is stored in Process Control Block?
+
+    Process:
+        - Uses Time Sharing:
+            Running one process, stopping it, then running another
+
+        - Virtualizes a CPU (Program things it has the whole CPU)
+
+        - Comprising of a Process:
+            Memory (address space)
+                Instructions
+                Data Section
+
+            Registers:
+                Program counter
+                Stack pointer
+
+        - States
+            Running
+                - Running on a processor
+
+            Ready
+                - A process is ready to run but for some reason the OS has 
+                  chosen not to run it at this given moment
+
+            Blocked
+                - A process has performed some kind of operation
+                - When a process initiates an I/O request to a disk,
+                  it becomes blocked and thus some other process can
+                  use the processor
+
+            
+
