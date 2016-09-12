@@ -70,7 +70,8 @@ void add_and_print(const char* num1, const char* num2) {
         }
     }
 
-    printf("%s + %s == %s\n", num1, num2, result_string); 
+    //printf("%s + %s == %s\n", num1, num2, result_string); 
+    printf("%s\n", result_string); 
 
     return;
 }
