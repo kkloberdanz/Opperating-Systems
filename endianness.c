@@ -15,4 +15,4 @@ void print_endianness() {
 int main() {
     print_endianness();
     return 0;
-} 
+}

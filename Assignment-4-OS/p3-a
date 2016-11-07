@@ -1,0 +1,36 @@
+Command: paging-linear-translate.py -P 8 -a 32 -p 1024 -v -s 1
+32B AS -> 5 bit VA, 8B Page Size -> 3 bit offset
+Page Table (from entry 0 down to the max size)
+  [       0]   0x00000000
+  [       1]   0x80000061
+  [       2]   0x00000000
+  [       3]   0x00000000
+
+Virtual Address Trace
+  VA 0x0000000e (decimal:       14) --> 0000030e (decimal      782) [VPN 1]
+      VA  = 1110
+      VPN = 1
+      PFN = 0x61
+      PA  = 0110 0001 1110 = 0x30e 
+
+  VA 0x00000014 (decimal:       20) -->  Invalid (VPN 2 not valid)
+      VA  = 1 0100
+      VPN = 2
+      PFN = Invalid!
+
+  VA 0x00000019 (decimal:       25) -->  Invalid (VPN 3 not valid)
+      VA  = 1 1001
+      VPN = 3
+      PFN = Invalid!
+
+  VA 0x00000003 (decimal:        3) -->  Invalid (VPN 0 not valid)
+      VA  = 1 0100
+      VPN = 0
+      PFN = Invalid!
+
+  VA 0x00000000 (decimal:        0) -->  Invalid (VPN 0 not valid)
+      VA  = 1 0100
+      VPN = 0
+      PFN = Invalid!
+
+

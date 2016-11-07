@@ -1,0 +1,49 @@
+Command: paging-linear-translate.py  -P 1k -a 16k -p 32k -v -u 50
+
+Page Table (from entry 0 down to the max size)
+  [       0]   0x80000018
+  [       1]   0x00000000
+  [       2]   0x00000000
+  [       3]   0x8000000c
+  [       4]   0x80000009
+  [       5]   0x00000000
+  [       6]   0x8000001d
+  [       7]   0x80000009
+  [       8]   0x80000013
+  [       9]   0x00000000
+  [      10]   0x8000001f
+  [      11]   0x8000001c
+  [      12]   0x00000000
+  [      13]   0x8000001c
+  [      14]   0x8000000f
+  [      15]   0x00000000
+
+Virtual Address Trace
+  VA 0x00001bc9 (decimal:     7113) --> 000077c9 (decimal    30665) [VPN 6]
+      VA  = 0110 1011 1100 1001
+      VPN = 6
+      PFN = 0x1d
+      PA  = 0111 0111 1100 1001 = 0x77c9
+
+  VA 0x00002718 (decimal:    10008) -->  Invalid (VPN 9 not valid)
+      VA  = 0010 0111 0001 1000
+      VPN = 9
+      PFN = Invalid!
+
+  VA 0x00003a6e (decimal:    14958) --> 00003e6e (decimal    15982) [VPN 14]
+      VA  = 0011 1010 0110 1110
+      VPN = 14
+      PFN = 0xf
+      PA  = 0011 1110 0110 1110 = 0x3e6e
+
+  VA 0x00003ddc (decimal:    15836) -->  Invalid (VPN 15 not valid)
+      VA  = 0011 1101 1101 1100
+      VPN = 15
+      PFN = Invalid!
+
+  VA 0x00001e87 (decimal:     7815) --> 00002687 (decimal     9863) [VPN 7]
+      VA  = 0001 1110 1000 0111
+      VPN = 7
+      PFN = 0x9
+      PA  = 0010 0110 1000 0111 = 0x2687
+

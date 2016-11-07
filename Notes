@@ -7,6 +7,26 @@ Office Hours
         Tuesday  : 3:30 PM - 5:30 PM
         Friday   : 2:30 PM - 3:30 PM
 
+Three Fundemental Concepts:
+    1) Virtualization
+        -> CPU:
+            Performance + Control
+            Limited direct execution: OS intercepts
+                and takes control if need be, but program
+                runs on the hardware
+
+        -> Memory:
+            Program wants whole memory
+                Program is given Virtual Address Space
+                (And never knows the physical addresses)
+                MMU translates physical address and virtual address
+
+    2) Concurrency
+
+    3) Persistance:
+        -> Non volitile storage (e.g. Disk, Filesystem, how to align
+           reads and writes)
+
 Bootstraping will be on midterm
 
 Calculate a ^ b
@@ -32,12 +52,8 @@ Calculate a ^ b
 
 ftell() gives number of bytes for a file
 
-Midterm: 
+Midterm (05 October 2016 - Everything until week before exam):
 
-    Default File Descriptors:
-        Stdout
-        Stdin
-        Stderr
 
     Global variables and static variables are stored in 'Static Data'
 
@@ -47,34 +63,533 @@ Midterm:
     Difference between process and thread?  
     What is stored in Process Control Block?
 
-    Process:
-        - Uses Time Sharing:
-            Running one process, stopping it, then running another
+Process Creation:
+    Load a program code into memory into the address space of the process
+    -> Lazy loading: load pieces of code or data as needed during 
+       execution, and not all at once
 
-        - Virtualizes a CPU (Program things it has the whole CPU)
+    Allocate run-time stack
+    -> Use stack for local vars, function params, and return addrs
+    -> Initialize the stack with arguments argc and argv for the main()
 
-        - Comprising of a Process:
-            Memory (address space)
-                Instructions
-                Data Section
+    Create the heap
 
-            Registers:
-                Program counter
-                Stack pointer
+    I/O Setup
+        Default File Descriptors:
+            Stdout
+            Stdin
+            Stderr
 
-        - States
-            Running
-                - Running on a processor
+    Start program at main()
 
-            Ready
-                - A process is ready to run but for some reason the OS has 
-                  chosen not to run it at this given moment
 
-            Blocked
-                - A process has performed some kind of operation
-                - When a process initiates an I/O request to a disk,
-                  it becomes blocked and thus some other process can
-                  use the processor
+Process:
+    - Uses Time Sharing:
+        Running one process, stopping it, then running another
 
+    - Virtualizes a CPU (Program things it has the whole CPU)
+
+    - Comprising of a Process:
+        Memory (address space)
+            Instructions
+            Data Section
+
+        Registers:
+            Program counter
+            Stack pointer
+
+    - States
+        Running
+            - Running on a processor
+
+        Ready
+            - A process is ready to run but for some reason the 
+              OS has chosen not to run it at this given moment
+
+        Blocked
+            - A process has performed some kind of operation
+            - When a process initiates an I/O request to a disk,
+              it becomes blocked and thus some other process can
+              use the processor
+
+    - PCB: C struct that contains information about each process, e.g.,
+           Stack pointer and other special registers
             
+
+
+Chapter 6. Mechanism: Limited Direct Execution
+Trap table:
+    Remember address of syscall handler
+    Tells which part of opperating system to wake up
+
+    -----------------
+    |  t#   | body* |
+    |-------|-------|
+    |       |       |
+    |       |       |
+    |       |       |
+    -----------------
+    
+Kernel Stack:
+    Saves state 
+    Registers and PC are saved here 
+    
+Active Stack:
+    Pointer to a stack
+    when kernel returns if multiple processes, tells which process to run
+
+    
+1) Performance
+2) OS Control
+
+
+Approaches to running a program:
+1) Simulation
+2) Emulation
+3) Direct Execution
+
+Direct Execution:
+1. Create entry for process list 
+2. Allocate memory for program 
+3. Load program into memory
+4. Set up stack with argc/ argv
+5. Clear registers 
+6. Execute call main() 
+7. Run main() 
+8. Execute returnfrom main()
+9. Free memory of process 10. Remove from process list
+
+Restricted Operations (Use syscalls)
+    Accessing the file system 
+    Creating and destroying processes 
+    Communicating with other processes 
+    Allocating more memory
+
+User mode:
+    Low privlidge
+Kernel Mode:
+    High privlidge
+
+Trap (hardware instruction): 
+    Go from user mode to kernel mode
+
+return from trap:
+    Go from kernel mode to user mode
+
+For Assignment 2:
+    Built in commands:
+        cd -> do NOT run with execvp, but with chdir()
+        pwd
+        cd dir
+        python script with arguments
+        wait
+        >
+        &
+
+execvp(_,_)
+
+Takes two arguments:
+    First : The command to run
+    Second: The whole array with arguments
+
+Simple Scheduler (Unrealistic assumptions)
+Assumptions
+1) Each job runs for the same amount of time
+2) All jobs arrive at the same time
+3) All jobs only use the CPU
+4) The runtime of each job is known
+
+Interactive Jobs: (Will be on exam)
+    (1) Turn arround time = T_turnaround = T_completing - T_arrival
+
+    (2) Fairness
+
+    (3) Response time
+        (T_FR is time that it first appears)
+        = T_FR - T_arrival
+
+First come, first served (FCFS)
+
+    - Convoy effect: A big job blocks smaller jobs
+
+    - Very simple and easy to implement
+
+    example:
+        - A arrived just before B which arrived just before C
+        - Each job runs for 10 seconds
+
+    Average turnaround time = (10 + 20 + 30) / 3 = 20 sec
+
+    Cons:
+        - Convoy effect: e.g., first job takes a very long time to 
+          run, holds up other jobs
+
+Shortest job first (SJF):
+    - Non-preemptive scheduler:
+        Once a job starts, don't interrupt it. Let it run
+        to completion
+
+Shortest Time-To-Completion First (STCF)
+    - May lead to "starvatin", i.e., a long running job will never 
+      be run if small jobs keep appearing
+
+Round Robin Scheduling
+    - Preemptive: Jobs can be interrupted
+
+    - Fair
+
+    - Run a job for a time slice (scheduling quantum) then switch to the 
+      next job in the run queue until the jobs are finished
+    
+    - t_slice % t_interrupt = 0 (will be on midterm)
+      because if not, then utilization would not be very good
+
+    - Turn around time is poor, because jobs will be stringed 
+      along for a long time
+
+    - Shorter response time: Better response time, but the cost of
+      context switching will dominate overall performance
+    
+    - Longer time slice: Amortize the cost of switching, worse response 
+      time
+
+In case of I/O:
+    - Run another job while waiting for I/O
+
+(1) if 'cd'
+    chdir(getenc(HOME));
+
+(2) 512 bytes
+
+(3) 
+
+(4) wait
+
+Response Time: Time to first respond to an incomming job
+
+Memory
+    Explain:
+        Stack and heap grow towards eachother
+        Heap grows downwards, heap grows upwards
+
+
+Mulitlevel Feedback Queue MLFQ (5 rules)
+    - A scheduler that learns from the past to predict the future
+    - Objective:
+        Optimize turnaround time -> run shorter jobs first
+        Minimize response time wi...
+
+    - (In queues) Up, higher priority, down lower priority
+
+1)
+2)
+3) When a job enters a system, put it in first queue (Highest priority)
+4) a) If a job uses up an entire time slice while running, its priority is
+      reduced
+5)
+
+Chap 16 (Not on midterm)
+    Recap: Memory Model
+
+       |Code          
+       |Data
+       |Heap
+       |(Free space)
+       |Stack 
+
+    Push 5 elements onto stack
+    ToS - 5 (ToS is the Top of Stack register)
+
+    Pop 5 elements froms stack
+    ToS + 5 (ToS is the Top of Stack register)
+
+    MMU has to registers:
+        Base Register
+        Bound Register
+
+    Virtual Address:
+        Physical Address = v + base
+
+        0 <= Virtual Address < Bound
+
+        Wastefull use of memory!
+
+Book: How would you measure a system call
+    0 byte read, take time before and time after, run multiple times, 
+    and take the average (Measure time to go to kernel and come back)
+
+    Example
+
+    time1
+    read(fd, _, 0, ...);
+    time2
+    tame2 - time1
+
+    Do this multiple times, and take the average
+
+
+Chap 16 (Continued)
+
+    Recap: Memory Model
+
+       |Code          
+       |Data
+       |Heap
+       |(Free space)
+       |Stack 
+    
+    Limitations:
+    1) Wasteful
+    2) Does not work if process address space > RAM
+    3) Sharing code not allowed
+
+    Solution:
+    Segmentation
+    
+    Logical Segment
+       |Code          
+       |Data
+       |Heap
+       |(Free space)
+       |Stack 
+
+    Hold each segment in contiguous memory and keep track of size
+    Keep each in its own segment
+    MMU Keeps track of segments 
+
+    Address translation:
+        physical address = offset + base
+
+
+Easy Log:
+    log2(16 KB) = log2(2^4 * 2^10)
+    14 bits
+
+Friday Quiz:
+    Chapter 16, 17, 18
+
+Paging
+1) Regular - 4kB
+2) Large
+
+    Page sharing: Multiple processes can share the same code
+
+    Why Paging?
+        Flexibility: Supporting the abstraction of address space effectively
+                     Don't need assumption how heap and stack grow and are used
+
+        Simplicity: Ease of free-space amanagement
+                    The page in address space and the page frame 
+                    are the same size
+                    Easy to allocate and keep a free list
+
+
+Page Table:
+    Problems:
+        1) PT can be large
+        2) PT Virtualization takes address translation space
+    
+    Each process has its own page table
+
+
+    64 KB address space -> 2^16
+    1GB memory          -> 2^30 -> (2^30) / (2^11) = 2^19 (Total pages 
+                                                           that mem can hold)
+    2KB Page size       -> 2^11
+        Can have up to 32 pages
+        5 bits to index
+    
+    VA (Virtual Address)
+    v1 v2 v3 v4 v5 v6 v7 ... v16
+
+
+    1GB memory -> 2^30 -> (2^30) / (2^11) = 2^19
+    p1 p2 ... p19 ... p30
+
+    ------- 32 entries (Because 32 pages)
+    19 bits Page table size = 32 * 19 bits
+    -------
+
+    -------
+
+    -------
+
+TLB -- (Translation Lookahead Buffer)
+    Cache for pageing
+
+    | VP | PF | bits |
+    |----|----|------|
+    |    |    |      |
+
+    Hardware Managed TLB
+
+    Software Managed TLB
+        - Trap handling
+        - Infinite TLB miss
+            - To avoid:
+                Store trap handler in unmapped, OS memory, not virt memory
+                Or, store the address translations in OS memory
+
+                If user can set this, then may get in infinite loop
+
+    Valid bit is 0 if the page does not exist
+
+    Example
+    VAS - Virtual Address Space - 4GB 
+    RAM       - 512 GB
+    Page Size - 4KB
+    + 5 bits
+
+
+    If page size is 16KB ->
+    address space = 2^32
+    2^18 page table entries * 4 bytes
+    = 1MB page table
+
+    
+    | code   | -> PTc
+    | unused |
+    | heap   | -> PTh
+    | stack  | -> PTs
+
+    base, bound
+    Tells which segment to start from
+
+    base = PTBR (Page Table Base Register)
+    bound = Number of Valid Pages
+
+Michael Dennis
+
+Multilevel Page Table
+
+-----------------------
+| PDE  | VPN  | offset|
+-----------------------
+
+| PD |
+|    |
+|    |
+|    |
+|    |
+|    |
+
+if 64 byte page table
+(2^8 * 2^2) / 64 = 2^4 -> 4 bits for PDE (Page Directory Index)
+
+
+30 bit address space
+Page = 512 bytes = 2^9
+offset = 9 bits
+VPN = 21 bits
+
+2^21 entries for linear page table
+4 byte entry page table -> 2 bits
+We have 7 left from the original 9
+PD = 2^14 entries
+
+Chop up page table, each chunk is the size of the page
+
+Final, multi-level page table (not single level)
+
+Each segment gets its own page table
+
+2 bits => 4 segments
+
+
+Given 32 bit VAS
+4KB page -> 14 bit offset
+PTE -> 16 bytes
+
+32 - 14 = 18 -> (2^18 * 16 bytes) virtual pages
+
+(2^18 * 16 bytes) / (2^14) = number of chunks
+log2(2^14) = number of bits needed
+
+
+
+VAS = 2^14 -> VA = 14 bits
+Page Size = 64 = 2^6 -> offset = 6 bits
+
+VPN = 14 bits - 6 bits = 8 bits
+
+PT Size = 2^8 * Entry Size
+(8 = # page table entries)
+
+Chunks = (2^8 * 2^2) / 2^6 = 2^4 (16 chunks)
+
+
+2^30 addr space, 2^9 offset = 512 bytes (page size) 
+PTE Size = 4 bytes = 2^2
+2^(9-2) = 2^7 page table entries
+
+30 - 9 = 21 bits
+21 - 7 = 14 bits 
+
+Example
+---------------------------------
+Address Space = # VPN * Page Size
+Page Size = 2^9
+VPN Number = 2^21
+Address Space = 2^30
+2^30 = 2^(21 + 9)
+
+Given PTE Size = 4 bytes
+|  | C0
+|  | C1
+|  | C2
+
+Page Size / PTE Size = 2^9 / 2^2 = 2^7 = 128
+Each chunk is of size 128
+
+Number of chunks = 2^21 / 2^7 = 2^14
+---------------------------------
+
+
+Example
+---------------------------------
+Given:
+    Page -> 8 bytes
+    VAS  -> 64 bytes
+    RAM  -> 512 bytes
+
+    Index: 2^6 = 64 -> 6 bits (VA)
+    Offset: 2^3 = 8 -> 3 bit offset
+    64 bytes / 8 bytes = 8 virtual pages
+    VPN: 2^3 = 8 -> 3 bits
+
+    VPN___
+    | | | | | | |
+           Offset
+    
+    Physical Address: 2^9 = 512
+    512 bytes / 8 = 64 Physical Pages
+    PFN: 2^6 = 64 -> 6 bits
+    Offset: 9 - 6 = 3 bits
+
+    Number of PTE: 8 (8 virtual pages, 1 entry for each)
+    Size of PTE: 11 bits
+
+        |PFN| 5 bits|
+        |PFN| 5 bits|
+    VPN>|PFN| 5 bits|
+        |PFN| 5 bits|
+        |PFN| 5 bits|
+        |PFN| 5 bits|
+---------------------------------
+
+Address Translation
+
+VPN Offset
+011 000      3 | 110010
+
+Physical Address -> 110010 000
+
+Access:
+    if (TPB Hit)
+        if (present bit is on)
+            done
+        else
+            fault
+            TLB Invalidate
+            done
 
