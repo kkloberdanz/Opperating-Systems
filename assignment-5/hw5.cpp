@@ -331,7 +331,7 @@ int main(int argc, char** argv) {
 
     PROGRAM_NAME = argv[0];
 
-    std::string dataset_name, query_name;
+    std::string dataset_name, query_name, output_name;
     for (size_t i = 1; i < argc; ++i) {
         std::string s(argv[i]);
 
@@ -343,6 +343,9 @@ int main(int argc, char** argv) {
 
         } else if (s == "-q") { // query file
             query_name = std::string(argv[++i]);
+
+        } else if (s == "-o") { // output file
+            output_name = std::string(argv[++i]);
 
         } else if ((s == "-h") || (s == "--help") || (s == "?") || (s == "/?")) {
             print_usage();
@@ -371,7 +374,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < NUM_THREADS; ++i) {
         query_v.push_back(remove_extension(query_name) + ".part_" + std::to_string(i) + ".txt");
         dataset_v.push_back(remove_extension(dataset_name) + std::to_string(i) + ".txt");
-        output_v.push_back("output.part_" + std::to_string(i) + ".txt");
+        output_v.push_back(output_name + ".part_" + std::to_string(i) + ".txt");
     }
 
     // load datafile into data_v
@@ -426,13 +429,6 @@ int main(int argc, char** argv) {
     std::vector<std::thread> thread_v;
     for (size_t i = 0; i < query_v.size(); ++i) {
         thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), output_v.at(i)));
-        /*
-        if (outOfMem) {
-            thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), output_v.at(i)));
-        } else {
-            thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), "output.txt"));
-        }
-        */
     }
 
     for (size_t i = 0; i < NUM_THREADS; ++i) {
@@ -440,9 +436,7 @@ int main(int argc, char** argv) {
     }
     // threads rejoined
 
-    //if (outOfMem) {
-        concatenate_files("output.txt", output_v);
-    //}
+    concatenate_files(output_name, output_v);
 
     time(&end); 
 
