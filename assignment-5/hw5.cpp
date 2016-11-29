@@ -11,6 +11,8 @@
 #include "splitfile.hpp"
 
 size_t NUM_THREADS = 1;
+bool outOfMem = false;
+std::vector<size_t> final_output;
 
 std::mutex mtx;
 
@@ -18,7 +20,7 @@ char* PROGRAM_NAME;
 
 void print_usage() { 
     std::cout << "Usage:" << std::endl;
-    std::cout << PROGRAM_NAME << " -d DATASET_FILE -q QUERY_FILE -o OUTPUT_FILE" << std::endl;
+    std::cout << PROGRAM_NAME << " -d DATASET_FILE -q QUERY_FILE -o OUTPUT_FILE [outOfMem]" << std::endl;
 }
 
 void error(std::string message) {
@@ -43,6 +45,35 @@ void print_vector(std::vector<T> v) {
 }
 
 template <typename T>
+class Data {
+    public:
+
+        Data() {
+            index = 0;
+        }
+
+        T get_next() {
+            return data_v.at(index++);
+        }
+
+        bool has_next() { 
+            return index <= data_v.size();
+        }
+
+        T at(size_t i) {
+            return data_v.at(i);
+        }
+
+        void add(T item) {
+            data_v.push_back(item);
+        }
+
+    private:
+        size_t index;
+        std::vector<T> data_v;
+};
+
+template <typename T>
 class MultiDimPoint { 
     private:
         std::vector<T> coordinates;
@@ -62,6 +93,16 @@ class MultiDimPoint {
         MultiDimPoint(std::vector<T> v) { 
             this->set(v);
         } 
+
+        /*
+        MultiDimPoint(const MultiDimPoint<T>& m) {
+            std::vector<T> v;
+            for (size_t i = 0; i < m.size(); ++i) {
+                v.push_back(m.at(i));
+            }
+            this->set(v);
+        }
+        */
 
         size_t size() {
             return coordinates.size();
@@ -97,6 +138,24 @@ class MultiDimPoint {
             std::cout << coordinates.back() << "]" << std::endl;
         }
 };
+
+//Data<MultiDimPoint<double>> data;
+std::vector<MultiDimPoint<double>> data_v;
+
+size_t get_data_v_size() {
+    mtx.lock();
+    size_t sz = data_v.size();
+    mtx.unlock();
+    return sz;
+}
+
+MultiDimPoint<double> get_point(size_t index) { 
+    mtx.lock();
+    //MultiDimPoint<double> p(data_v.at(index));
+    MultiDimPoint<double> p = data_v.at(index);
+    mtx.unlock();
+    return p;
+}
 
 std::vector<std::string> split(std::string s, const char delim) { 
     std::vector<std::string> v;
@@ -169,7 +228,7 @@ void run(size_t threadnum, std::string query_name, std::string dataset_name, std
     */
 
     std::ifstream query(query_name);
-    std::ifstream dataset;
+    //std::ifstream dataset;
 
     std::ofstream output_file(output);
 
@@ -210,34 +269,59 @@ void run(size_t threadnum, std::string query_name, std::string dataset_name, std
 
         index = 1;
 
-        dataset.open(dataset_name);
-        if (not dataset.is_open()) {
-            error("Could not open file: " + dataset_name);
-        }
+        if (outOfMem) {
 
-        getline(dataset, dataset_line);
-        while (getline(dataset, dataset_line)) {
-            dataset_split_line = split(dataset_line, '\t');
-            point_v = v_string_to_v_double(dataset_split_line); 
+            //std::cout << "Out of Memory" << std::endl;
 
-            dataset_point.set(point_v);
-
-            //std::cout << "Dims: " << query_point.num_dim() << " and " << dataset_point.num_dim() << std::endl;
-            //std::cout << "-> "  << query_split_line.size() << ", " << dataset_split_line.size() << std::endl;
-
-            //print_vector(dataset_split_line);
-            //print_vector(query_split_line);
-
-            candidate_value = query_point.distance(dataset_point);
-            if (candidate_value < min_value) {
-                min_value = candidate_value;
-                index_of_min = index;
+            std::ifstream dataset;
+            dataset.open(dataset_name);
+            if (not dataset.is_open()) {
+                error("Could not open file: " + dataset_name);
             }
-            index++;
+
+            getline(dataset, dataset_line);
+
+            while (getline(dataset, dataset_line)) {
+
+                dataset_split_line = split(dataset_line, '\t');
+                point_v = v_string_to_v_double(dataset_split_line); 
+
+                dataset_point.set(point_v);
+
+                //std::cout << "Dims: " << query_point.num_dim() << " and " << dataset_point.num_dim() << std::endl;
+                //std::cout << "-> "  << query_split_line.size() << ", " << dataset_split_line.size() << std::endl;
+
+                //print_vector(dataset_split_line);
+                //print_vector(query_split_line);
+
+                candidate_value = query_point.distance(dataset_point);
+                if (candidate_value < min_value) {
+                    min_value = candidate_value;
+                    index_of_min = index;
+                }
+                index++;
+            }
+            dataset.close();
+        } else {
+            // TODO
+            //std::cout << "In Memory" << std::endl;
+            size_t size = get_data_v_size();
+            MultiDimPoint<double> point;
+
+            for (size_t i = 0; i < size; ++i) {
+                point = get_point(i);
+                candidate_value = query_point.distance(point);
+                if (candidate_value < min_value) {
+                    min_value = candidate_value;
+                    index_of_min = index;
+                }
+                index++;
+            }
         }
-        dataset.close();
         //std::cout << index_of_min << std::endl;
+        mtx.lock();
         output_file << index_of_min << std::endl;
+        mtx.unlock();
     }
     query.close();
     output_file.close();
@@ -247,7 +331,7 @@ int main(int argc, char** argv) {
 
     PROGRAM_NAME = argv[0];
 
-    std::string dataset, query;
+    std::string dataset_name, query_name;
     for (size_t i = 1; i < argc; ++i) {
         std::string s(argv[i]);
 
@@ -255,24 +339,27 @@ int main(int argc, char** argv) {
             NUM_THREADS = atoi(argv[++i]);
 
         } else if (s == "-d") { // dataset file
-            dataset = std::string(argv[++i]);
+            dataset_name = std::string(argv[++i]);
 
         } else if (s == "-q") { // query file
-            query = std::string(argv[++i]);
+            query_name = std::string(argv[++i]);
 
         } else if ((s == "-h") || (s == "--help") || (s == "?") || (s == "/?")) {
             print_usage();
+
+        } else if (s == "outOfMem") {
+            outOfMem = true;
 
         } else {
             error("unknown option: '" + s + "'");
         }
     }
 
-    if (dataset.empty()) {
+    if (dataset_name.empty()) {
         error("no dataset file specified");
     }
 
-    if (query.empty()) {
+    if (query_name.empty()) {
         error("no query file specified");
     }
 
@@ -282,19 +369,55 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> query_v, dataset_v, output_v;
     for (size_t i = 0; i < NUM_THREADS; ++i) {
-        query_v.push_back(remove_extension(query) + ".part_" + std::to_string(i) + ".txt");
-        dataset_v.push_back(remove_extension(dataset) + std::to_string(i) + ".txt");
+        query_v.push_back(remove_extension(query_name) + ".part_" + std::to_string(i) + ".txt");
+        dataset_v.push_back(remove_extension(dataset_name) + std::to_string(i) + ".txt");
         output_v.push_back("output.part_" + std::to_string(i) + ".txt");
     }
+
+    // load datafile into data_v
+    if (not outOfMem) {
+        std::cout << "HERE" << std::endl;
+        std::ifstream dataset(dataset_name);
+        // TODO
+        if (not dataset.is_open()) {
+            error("Could not open file: " + dataset_name);
+        }
+
+        // eat metatdata line
+        std::string dataset_line;
+        getline(dataset, dataset_line); 
+
+        std::vector<std::string> dataset_split_line;
+        std::vector<double> point_v;
+        MultiDimPoint<double> dataset_point;
+        while (getline(dataset, dataset_line)) {
+
+            dataset_split_line = split(dataset_line, '\t');
+            point_v = v_string_to_v_double(dataset_split_line); 
+
+            dataset_point.set(point_v); 
+            data_v.push_back(dataset_point);
+        }
+        dataset.close();
+    }
+
+    std::cout << "size: " << data_v.size() << std::endl;
+    /*
+    for (size_t i = 0; i < data_v.size(); ++i) {
+        std::cout << "---------------------" << std::endl;
+        data_v.at(i).print();
+    }
+    */
 #ifdef DEBUG
     print_vector(query_v);
 #endif
-    split_file(query, query_v); 
+    split_file(query_name, query_v); 
 
-    for (const std::string& copy : dataset_v) {
-        copy_file(dataset, copy);
+    if (outOfMem) {
+        for (const std::string& copy : dataset_v) {
+            copy_file(dataset_name, copy);
+        }
     }
-
 
     time_t start, end;
     time(&start);
@@ -303,6 +426,13 @@ int main(int argc, char** argv) {
     std::vector<std::thread> thread_v;
     for (size_t i = 0; i < query_v.size(); ++i) {
         thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), output_v.at(i)));
+        /*
+        if (outOfMem) {
+            thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), output_v.at(i)));
+        } else {
+            thread_v.push_back(std::thread(run, i, query_v.at(i), dataset_v.at(i), "output.txt"));
+        }
+        */
     }
 
     for (size_t i = 0; i < NUM_THREADS; ++i) {
@@ -310,7 +440,9 @@ int main(int argc, char** argv) {
     }
     // threads rejoined
 
-    concatenate_files("output.txt", output_v);
+    //if (outOfMem) {
+        concatenate_files("output.txt", output_v);
+    //}
 
     time(&end); 
 

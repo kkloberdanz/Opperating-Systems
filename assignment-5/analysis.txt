@@ -1,0 +1,27 @@
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 0
+Runtime: 0.003079652786254883s
+Program exited with ERROR, FAILED
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 1
+Runtime: 401.87473583221436s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 2
+Runtime: 211.355566740036s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 3
+Runtime: 154.38114953041077s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 4
+Runtime: 116.10252499580383s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 5
+Runtime: 116.22862362861633s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 6
+Runtime: 116.16134834289551s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 7
+Runtime: 116.1305046081543s
+Hash PASSED at ./output.txt
+Running: ./hw5 -d dataset.txt -q Test/query.txt -n 8
+Runtime: 116.20315980911255s
+Hash PASSED at ./output.txt
