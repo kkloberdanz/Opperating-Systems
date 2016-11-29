@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
 
     // load datafile into data_v
     if (not outOfMem) {
-        std::cout << "HERE" << std::endl;
+        //std::cout << "HERE" << std::endl;
         std::ifstream dataset(dataset_name);
         // TODO
         if (not dataset.is_open()) {
@@ -401,7 +401,7 @@ int main(int argc, char** argv) {
         dataset.close();
     }
 
-    std::cout << "size: " << data_v.size() << std::endl;
+    //std::cout << "size: " << data_v.size() << std::endl;
     /*
     for (size_t i = 0; i < data_v.size(); ++i) {
         std::cout << "---------------------" << std::endl;
