@@ -14,8 +14,16 @@ size_t NUM_THREADS = 1;
 
 std::mutex mtx;
 
+char* PROGRAM_NAME;
+
+void print_usage() { 
+    std::cout << "Usage:" << std::endl;
+    std::cout << PROGRAM_NAME << " -d DATASET_FILE -q QUERY_FILE -o OUTPUT_FILE" << std::endl;
+}
+
 void error(std::string message) {
-    std::cerr << "error: " << message << std::endl;
+    std::cerr << PROGRAM_NAME << ": error: " << message << std::endl;
+    print_usage();
     exit(EXIT_FAILURE);
 }
 
@@ -237,6 +245,8 @@ void run(size_t threadnum, std::string query_name, std::string dataset_name, std
 
 int main(int argc, char** argv) {
 
+    PROGRAM_NAME = argv[0];
+
     std::string dataset, query;
     for (size_t i = 1; i < argc; ++i) {
         std::string s(argv[i]);
@@ -249,6 +259,9 @@ int main(int argc, char** argv) {
 
         } else if (s == "-q") { // query file
             query = std::string(argv[++i]);
+
+        } else if ((s == "-h") || (s == "--help") || (s == "?") || (s == "/?")) {
+            print_usage();
 
         } else {
             error("unknown option: '" + s + "'");
