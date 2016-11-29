@@ -358,6 +358,10 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (output_name.empty()) {
+        error("no output file specified");
+    }
+
     if (dataset_name.empty()) {
         error("no dataset file specified");
     }
